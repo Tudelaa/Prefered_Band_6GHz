@@ -1,41 +1,31 @@
-﻿# this script is use as remediation to change the prefered band to 6Ghz for realtek and intel Wi-Fi network cards
-
-
-
-
-$Network_values = Get-NetAdapterAdvancedProperty -Name W*i -DisplayName "Preferred Band" -ErrorAction SilentlyContinue
 $Network_Card = Get-NetAdapter -Name Wi* | Select-Object * -ErrorAction SilentlyContinue
- 
+$Net_Properties = Get-NetAdapterAdvancedProperty -Name Wi* -DisplayName "Preferred Band" -ErrorAction SilentlyContinue
+$Model = $Network_Card.DriverDescription
+$Display_Value = $Net_Properties.DisplayValue
 
-try {
 
-if ($Network_Card.DriverDescription -match "Realtek") { 
+if ($Model -match "Realtek") { 
 
                                                        Set-NetAdapterAdvancedProperty -Name W*i -DisplayName "Preferred Band" -DisplayValue "4. 6G first"
-                                                       
+                                                       Write-Host "Preffered Band has changed from $Display_Value to 6GHz"
+                                                       exit 0
+
                                                       } 
 
-if ($Network_Card.DriverDescription -match "Intel") { 
+if ($Model -match "Intel" -or $Model -match "MediaTek") { 
 
                                                        Set-NetAdapterAdvancedProperty -Name W*i -DisplayName "Preferred Band" -DisplayValue "4. Prefer 6GHz band"
-                                                       
+                                                       Write-Host "Preffered Band has changed from $Display_Value to 6GHz"
+                                                       exit 0
      
      
                                                        } 
 
-Write-Host "Preffered Band has changed to 6GHz"
-  
-exit 0
-  
-   }                                                  
-      
-catch {
 
+ else { 
+ 
+ 
+      Write-Host "Preferred Band has NOT changed and continuing in $Display_Value" 
+      exit 1
 
-       Write-Host "Preffered Band has not changed to 6GHz"
-       
-       exit 1
-
-       }
-       
-         
+       }         
