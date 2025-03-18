@@ -8,7 +8,7 @@
 
 [int]$WiFi_E6_True=0
 
-$Interfaces = Get-NetAdapter | Select-Object * 
+$Interfaces = Get-NetAdapter -Name Wi* | Select-Object * 
 
 
 
@@ -18,29 +18,35 @@ foreach ($Interface in $Interfaces) {
                                          
 
                                          $Network_Name = $Interface.Name
+                                         $Model = $Interface.DriverDescription
                                          $Network_Card = Get-NetAdapter -Name $Network_Name | Select-Object * -ErrorAction SilentlyContinue
-                                         
+                                         $Net_Properties = Get-NetAdapterAdvancedProperty -Name $Network_Name -DisplayName "Preferred Band"
+                                         $Preferred_Band = $Net_properties.DisplayValue
                                                                          
-                                         if ($interface.DriverDescription -match "6E" -or $interface.DriverDescription -match "7" ) { 
-                                         write-host "$Network_Name support Wi-Fi 6E"
+                                         if ($Model -match "6E" -or $Model -match "7" ) { 
+                                         #write-host "$Network_Name support Wi-Fi 6E"
                                          
-                                         $Preffered_Band = Get-NetAdapterAdvancedProperty -Name $Network_Name -DisplayName "Preferred Band"
 
-                                                                                                                                     if ($Preffered_Band.DisplayValue -notmatch "4. 6G first" -or $Preffered_Band.DisplayValue -notmatch "4. Prefer 6GHz band"){
-                                                                                                                                     
-                                         
+                                                                                         #if ($Preferred_Band -notmatch "4. 6G first" -or $Preferred_Band -notmatch "4. Prefer 6GHz band"){
+
+
+                                                                                         if ($Preferred_Band -notmatch "4.") {
+
+                                                                                          write-host "$Network_Name model $Model support Wi-Fi 6E but prefered band is $Preferred_Band"
                                                                                                                                       
                                                                                                                                       
                                                                                                                                       $WiFi_E6_True++ 
-                                                                                                                                      
-                                                                                                                                      write-host "Preffered Band is not running 6GHz band"
-                                                                                                                                      
                                                                                                                                       }
+
+                                                                                          else { 
+                                                                                          
+                                                                                                write-host "$Network_Name model $Model supports Wi-Fi 6E and Prefered band is correct: $Preferred_Band" 
+                                                                                               }
                                          }
 
                                          else { 
 
-                                         Write-Host "$Network_Name does not support Wi-Fi 6E"
+                                         Write-Host "$Network_Name model $Model does not support Wi-Fi 6E and band is working in $Preferred_Band"
                                          
 
                                               }
@@ -60,5 +66,4 @@ else {
      }
      
      
-                                                        
-
+               
